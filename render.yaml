@@ -1,0 +1,50 @@
+services:
+  - type: web
+    name: crosscourse-assignment-php-api
+    runtime: docker
+    plan: free
+    dockerfilePath: ./Dockerfile
+    autoDeploy: true
+    envVars:
+      - key: APP_ENV
+        value: production
+      - key: APP_DEBUG
+        value: "false"
+      - key: APP_URL
+        sync: false
+      - key: APP_KEY
+        sync: false
+      - key: FRONTEND_URL
+        sync: false
+      - key: DB_CONNECTION
+        value: pgsql
+      - key: DB_HOST
+        fromDatabase:
+          name: crosscourse-assignment-db
+          property: host
+      - key: DB_PORT
+        fromDatabase:
+          name: crosscourse-assignment-db
+          property: port
+      - key: DB_DATABASE
+        fromDatabase:
+          name: crosscourse-assignment-db
+          property: database
+      - key: DB_USERNAME
+        fromDatabase:
+          name: crosscourse-assignment-db
+          property: user
+      - key: DB_PASSWORD
+        fromDatabase:
+          name: crosscourse-assignment-db
+          property: password
+      - key: SESSION_DRIVER
+        value: file
+      - key: CACHE_DRIVER
+        value: file
+      - key: QUEUE_CONNECTION
+        value: sync
+
+databases:
+  - name: crosscourse-assignment-db
+    plan: free
