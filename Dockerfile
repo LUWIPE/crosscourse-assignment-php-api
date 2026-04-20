@@ -1,4 +1,4 @@
-FROM php:8.3-cli-alpine
+FROM php:8.4-cli-alpine
 
 # System dependencies needed by Laravel and Composer.
 RUN apk add --no-cache \
