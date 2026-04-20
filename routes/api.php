@@ -5,6 +5,7 @@ use App\Http\Controllers\Api\AuthController;
 use App\Http\Controllers\Api\EventController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 
 Route::get('/', function () {
     return response()->json([
@@ -18,7 +19,7 @@ Route::get('/schema', function () {
     return response()->json([
         'name' => config('app.name'),
         'status' => 'ok',
-        'message' => 'Schema overview',
+        'message' => 'Schema overview with seeded data',
         'schema' => [
             'tables' => [
                 'types' => ['id', 'name', 'description', 'created_at', 'updated_at'],
@@ -50,6 +51,21 @@ Route::get('/schema', function () {
                 'Grade hasMany Product',
                 'Digital hasMany Product',
             ],
+        ],
+        'sample_data' => [
+            'types' => DB::table('types')->limit(3)->get(),
+            'grades' => DB::table('grades')->limit(3)->get(),
+            'digitals' => DB::table('digitals')->get(),
+            'products' => DB::table('products')
+                ->select(['id', 'name', 'price', 'release', 'description', 'stock', 'type_id', 'grade_id', 'digital_id'])
+                ->limit(5)
+                ->get(),
+        ],
+        'counts' => [
+            'types' => DB::table('types')->count(),
+            'grades' => DB::table('grades')->count(),
+            'digitals' => DB::table('digitals')->count(),
+            'products' => DB::table('products')->count(),
         ],
     ]);
 });
