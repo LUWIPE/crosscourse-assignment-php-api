@@ -84,17 +84,42 @@ Route::get('/schema', function () {
 });
 
 Route::get('/migrate', function () {
+    $db_url = env('DB_URL');
+    $db_connection = env('DB_CONNECTION');
+    $db_host = env('DB_HOST');
+
+    if (!$db_url) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'DB_URL environment variable is not set',
+            'instructions' => 'Set DB_URL in Render environment to your PostgreSQL external connection string',
+            'current_env' => [
+                'DB_URL' => $db_url ?: 'NOT SET',
+                'DB_CONNECTION' => $db_connection,
+                'DB_HOST' => $db_host ?: 'NOT SET',
+            ],
+        ], 500);
+    }
+
     try {
         \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $migrate_output = \Illuminate\Support\Facades\Artisan::output();
+
         \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        $seed_output = \Illuminate\Support\Facades\Artisan::output();
+
         return response()->json([
             'status' => 'success',
             'message' => 'Migrations and seeders completed',
+            'migrate_output' => $migrate_output,
+            'seed_output' => $seed_output,
         ]);
     } catch (\Exception $e) {
         return response()->json([
             'status' => 'error',
             'message' => $e->getMessage(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
         ], 500);
     }
 });
