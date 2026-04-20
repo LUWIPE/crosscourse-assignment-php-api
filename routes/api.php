@@ -16,10 +16,34 @@ Route::get('/', function () {
 });
 
 Route::get('/schema', function () {
+    try {
+        $sample_data = [
+            'types' => DB::table('types')->limit(3)->get(),
+            'grades' => DB::table('grades')->limit(3)->get(),
+            'digitals' => DB::table('digitals')->get(),
+            'products' => DB::table('products')
+                ->select(['id', 'name', 'price', 'release', 'description', 'stock', 'type_id', 'grade_id', 'digital_id'])
+                ->limit(5)
+                ->get(),
+        ];
+        $counts = [
+            'types' => DB::table('types')->count(),
+            'grades' => DB::table('grades')->count(),
+            'digitals' => DB::table('digitals')->count(),
+            'products' => DB::table('products')->count(),
+        ];
+        $db_status = 'connected';
+    } catch (\Exception $e) {
+        $sample_data = null;
+        $counts = null;
+        $db_status = 'error: ' . $e->getMessage();
+    }
+
     return response()->json([
         'name' => config('app.name'),
         'status' => 'ok',
-        'message' => 'Schema overview with seeded data',
+        'message' => 'Schema overview',
+        'database' => $db_status,
         'schema' => [
             'tables' => [
                 'types' => ['id', 'name', 'description', 'created_at', 'updated_at'],
@@ -52,22 +76,27 @@ Route::get('/schema', function () {
                 'Digital hasMany Product',
             ],
         ],
-        'sample_data' => [
-            'types' => DB::table('types')->limit(3)->get(),
-            'grades' => DB::table('grades')->limit(3)->get(),
-            'digitals' => DB::table('digitals')->get(),
-            'products' => DB::table('products')
-                ->select(['id', 'name', 'price', 'release', 'description', 'stock', 'type_id', 'grade_id', 'digital_id'])
-                ->limit(5)
-                ->get(),
-        ],
-        'counts' => [
-            'types' => DB::table('types')->count(),
-            'grades' => DB::table('grades')->count(),
-            'digitals' => DB::table('digitals')->count(),
-            'products' => DB::table('products')->count(),
-        ],
+        'sample_data' => $sample_data,
+        'counts' => $counts,
+        'migrate_url' => '/api/migrate',
+        'migrate_instruction' => 'If database error above, visit /api/migrate to run migrations',
     ]);
+});
+
+Route::get('/migrate', function () {
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Migrations and seeders completed',
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+        ], 500);
+    }
 });
 
 Route::middleware('auth:sanctum')
