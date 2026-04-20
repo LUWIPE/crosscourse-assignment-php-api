@@ -84,24 +84,34 @@ Route::get('/schema', function () {
 });
 
 Route::get('/migrate', function () {
-    return response()->json([
-        'status' => 'info',
-        'message' => 'Database setup endpoint',
-        'environment_check' => [
-            'DB_CONNECTION' => env('DB_CONNECTION'),
-            'DB_URL' => env('DB_URL') ? 'SET' : 'NOT SET',
-            'DB_HOST' => env('DB_HOST') ?: 'NOT SET',
-            'APP_DEBUG' => env('APP_DEBUG'),
-        ],
-        'instructions' => [
-            1 => 'Check Render PostgreSQL resource page',
-            2 => 'Copy External Database URL',
-            3 => 'Go to web service Environment variables',
-            4 => 'Add DB_URL = [external connection string]',
-            5 => 'Redeploy web service',
-            6 => 'Visit /api/migrate again',
-        ],
-    ]);
+    if (!env('DB_URL')) {
+        return response()->json([
+            'status' => 'error',
+            'message' => 'DB_URL not set',
+            'instructions' => 'Set DB_URL in Render environment variables',
+        ], 400);
+    }
+
+    try {
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $migrate_output = \Illuminate\Support\Facades\Artisan::output();
+
+        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        $seed_output = \Illuminate\Support\Facades\Artisan::output();
+
+        return response()->json([
+            'status' => 'success',
+            'message' => 'Migrations and seeders completed',
+            'migrate_output' => trim($migrate_output),
+            'seed_output' => trim($seed_output),
+        ]);
+    } catch (\Exception $e) {
+        return response()->json([
+            'status' => 'error',
+            'message' => $e->getMessage(),
+            'trace' => $e->getTraceAsString(),
+        ], 500);
+    }
 });
 
 Route::middleware('auth:sanctum')
