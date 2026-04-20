@@ -33,10 +33,10 @@ Route::get('/schema', function () {
             'products' => DB::table('products')->count(),
         ];
         $db_status = 'connected';
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         $sample_data = null;
         $counts = null;
-        $db_status = 'error: ' . $e->getMessage();
+        $db_status = 'error (' . get_class($e) . '): ' . $e->getMessage();
     }
 
     return response()->json([
@@ -93,23 +93,29 @@ Route::get('/migrate', function () {
     }
 
     try {
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        DB::connection()->getPdo();
+
+        $migrate_exit_code = \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
         $migrate_output = \Illuminate\Support\Facades\Artisan::output();
 
-        \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+        $seed_exit_code = \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
         $seed_output = \Illuminate\Support\Facades\Artisan::output();
 
         return response()->json([
             'status' => 'success',
             'message' => 'Migrations and seeders completed',
+            'migrate_exit_code' => $migrate_exit_code,
+            'seed_exit_code' => $seed_exit_code,
             'migrate_output' => trim($migrate_output),
             'seed_output' => trim($seed_output),
         ]);
-    } catch (\Exception $e) {
+    } catch (\Throwable $e) {
         return response()->json([
             'status' => 'error',
+            'error_type' => get_class($e),
             'message' => $e->getMessage(),
-            'trace' => $e->getTraceAsString(),
+            'file' => $e->getFile(),
+            'line' => $e->getLine(),
         ], 500);
     }
 });
