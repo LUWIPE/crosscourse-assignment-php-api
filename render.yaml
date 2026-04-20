@@ -20,23 +20,23 @@ services:
         value: pgsql
       - key: DB_HOST
         fromDatabase:
-          name: crosscourse-assignment-db
+          name: crosscourse-assignment-php-api
           property: host
       - key: DB_PORT
         fromDatabase:
-          name: crosscourse-assignment-db
+          name: crosscourse-assignment-php-api
           property: port
       - key: DB_DATABASE
         fromDatabase:
-          name: crosscourse-assignment-db
+          name: crosscourse-assignment-php-api
           property: database
       - key: DB_USERNAME
         fromDatabase:
-          name: crosscourse-assignment-db
+          name: crosscourse-assignment-php-api
           property: user
       - key: DB_PASSWORD
         fromDatabase:
-          name: crosscourse-assignment-db
+          name: crosscourse-assignment-php-api
           property: password
       - key: SESSION_DRIVER
         value: file
@@ -44,7 +44,3 @@ services:
         value: file
       - key: QUEUE_CONNECTION
         value: sync
-
-databases:
-  - name: crosscourse-assignment-db
-    plan: free
