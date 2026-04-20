@@ -18,26 +18,10 @@ services:
         sync: false
       - key: DB_CONNECTION
         value: pgsql
-      - key: DB_HOST
+      - key: DB_URL
         fromDatabase:
           name: crosscourse-assignment-php-api
-          property: host
-      - key: DB_PORT
-        fromDatabase:
-          name: crosscourse-assignment-php-api
-          property: port
-      - key: DB_DATABASE
-        fromDatabase:
-          name: crosscourse-assignment-php-api
-          property: database
-      - key: DB_USERNAME
-        fromDatabase:
-          name: crosscourse-assignment-php-api
-          property: user
-      - key: DB_PASSWORD
-        fromDatabase:
-          name: crosscourse-assignment-php-api
-          property: password
+          property: externalConnectionString
       - key: SESSION_DRIVER
         value: file
       - key: CACHE_DRIVER
