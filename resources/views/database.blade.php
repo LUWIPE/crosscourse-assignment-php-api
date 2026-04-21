@@ -132,6 +132,13 @@
 		<h1>Database Overview</h1>
 		<p class="intro">Visual snapshot of your seeded data by table.</p>
 
+		@if (!empty($error))
+			<section>
+				<h2 class="section-title">Database Error</h2>
+				<p class="empty">Could not load database records: {{ $error }}</p>
+			</section>
+		@endif
+
 		<div class="cards">
 			<article class="card"><p class="name">Products</p><p class="value">{{ $products->count() }}</p></article>
 			<article class="card"><p class="name">Types</p><p class="value">{{ $types->count() }}</p></article>

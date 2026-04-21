@@ -84,11 +84,18 @@ Route::get('/schema', function () {
 });
 
 Route::get('/migrate', function () {
-    if (!env('DB_URL')) {
+    $has_database_url = filled(env('DATABASE_URL'));
+    $has_db_connection = filled(env('DB_CONNECTION'))
+        && filled(env('DB_HOST'))
+        && filled(env('DB_PORT'))
+        && filled(env('DB_DATABASE'))
+        && filled(env('DB_USERNAME'));
+
+    if (!$has_database_url && !$has_db_connection) {
         return response()->json([
             'status' => 'error',
-            'message' => 'DB_URL not set',
-            'instructions' => 'Set DB_URL in Render environment variables',
+            'message' => 'Database environment variables are missing',
+            'instructions' => 'Set DATABASE_URL or DB_CONNECTION/DB_HOST/DB_PORT/DB_DATABASE/DB_USERNAME/DB_PASSWORD in Render environment variables',
         ], 400);
     }
 

@@ -55,3 +55,24 @@ After first successful deploy, open Render Shell and run:
 
 php artisan migrate --force
 php artisan db:seed --force
+
+### If views do not load after deploy
+
+1. Check that `APP_KEY` is set in Render environment variables.
+2. Ensure database variables are configured (`DB_CONNECTION`, `DB_HOST`, `DB_PORT`, `DB_DATABASE`, `DB_USERNAME`, `DB_PASSWORD` or `DATABASE_URL`).
+3. In Render Shell, clear stale caches:
+
+php artisan optimize:clear
+
+### If you cannot use Render Shell
+
+Use the HTTP endpoint below once after deploy:
+
+- `GET /api/migrate`
+
+This endpoint runs:
+
+- `php artisan migrate --force`
+- `php artisan db:seed --force`
+
+Make sure database env vars are set first (`DATABASE_URL` or `DB_CONNECTION` + `DB_HOST` + `DB_PORT` + `DB_DATABASE` + `DB_USERNAME` + `DB_PASSWORD`).
