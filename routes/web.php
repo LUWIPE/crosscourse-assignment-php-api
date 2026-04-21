@@ -13,7 +13,7 @@ route::get('/', function () {
     return view('welcome');
 });
 
-Route::get('/', function () {
+Route::get('/database', function () {
     return view('database', [
         'products' => Product::with(['type', 'grade', 'digital'])->orderBy('id')->get(),
         'types' => Type::orderBy('id')->get(),
